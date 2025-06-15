@@ -1,0 +1,53 @@
+{
+    "application": {
+        "name": "My Ecosys Account",
+        "version": "1.0.0",
+        "description": "This is the centralized user portal for managing your Ecosys account.",
+        "background": "This application serves as a user management portal for Ecosys, allowing users to register, log in, and manage their accounts securely.",
+        "Development": "This application is developed by Michael Sanchez, a software engineer with a focus on web applications. It is built using PHP and MySQL, ensuring a robust and secure user management system.",
+        "ImportantNotice": "This application is designed to be secure and user-friendly.",
+        "features": [
+            "User Registration",
+            "Login System",
+            "Password Reset",
+            "Profile Management",
+            "Account Settings",
+            "My Application"
+        ],
+        "homepage": "https://account.ecosyscorp.ph/",
+        "author": "Michael Sanchez",
+        "license": "GNU General Public License v3.0",
+        "repository": {
+            "type": "git",
+            "url": ""
+        },
+        "platform": "Web",
+        "keywords": [
+            "ecosys",
+            "account",
+            "portal",
+            "user management"
+        ],
+        "ProgrammingLanguage": "PHP",
+        "framework": "Vanilla PHP",
+        "DesignPatternOfBackend ":{
+            "type": "MVC",
+            "description": "The application follows the Model-View-Controller (MVC) design pattern to separate concerns and enhance maintainability.",
+            "Authentication": {
+                "type": "Oauth2",
+                "description": "The application uses Oauth2 for secure authentication, allowing users to log in with their Ecosys credentials. It must be configurable to work with the Ecosys API."
+            }
+        },
+        "DesignPatternOfFrontend": {
+            "type": "Concern Separation, Good Layout, Responsive Design",
+            "Language": "HTML, CSS, JavaScript, PHP",
+            "description": "The frontend is designed to be responsive, ensuring a seamless user experience across devices."
+        },
+        "Database": "MySQL",
+        "Libraries": [
+            "PHPMailer",
+            "PDO"
+        ]
+       
+    }
+}
