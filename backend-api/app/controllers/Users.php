@@ -10,6 +10,105 @@ class Users {
 
     public function index(){ /* ... */ }
 
+    /**
+     * Handle user login by authenticating with OAuth server
+     * Expects JSON payload with username and password
+     */
+    public function login() {
+        // Start session if not already started
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // Get the raw POST data
+        $data = json_decode(file_get_contents("php://input"));
+
+        // Validate input
+        if (empty($data->username) || empty($data->password)) {
+            http_response_code(400);
+            echo json_encode(['message' => 'Username and password are required']);
+            return;
+        }
+
+        // Prepare token request data
+        $token_url = \OAUTH_SERVER_URL . \OAUTH_TOKEN_ENDPOINT;
+        
+        $post_data = http_build_query([
+            'grant_type' => 'password',
+            'client_id' => \OAUTH_CLIENT_ID,
+            'client_secret' => \OAUTH_CLIENT_SECRET,
+            'username' => $data->username,
+            'password' => $data->password,
+            'scope' => ''
+        ]);
+
+        // Initialize cURL session
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $token_url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $post_data,
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/x-www-form-urlencoded',
+                'Accept: application/json'
+            ],
+            CURLOPT_SSL_VERIFYPEER => false, // Only for testing, remove in production
+            CURLOPT_SSL_VERIFYHOST => 0      // Only for testing, remove in production
+        ]);
+
+        $response = curl_exec($ch);
+        $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        // Log the response for debugging
+        error_log('OAuth token response status: ' . $http_status);
+        error_log('OAuth token response: ' . $response);
+
+        if ($error) {
+            error_log('cURL error: ' . $error);
+            http_response_code(500);
+            echo json_encode([
+                'message' => 'Failed to connect to authentication server',
+                'error' => $error
+            ]);
+            return;
+        }
+
+        $token_data = json_decode($response);
+
+        if ($http_status !== 200) {
+            $message = $token_data->message ?? 'Authentication failed';
+            http_response_code(401);
+            echo json_encode([
+                'message' => $message,
+                'details' => $token_data->error_description ?? null
+            ]);
+            return;
+        }
+
+        // Store token in session
+        $_SESSION['access_token'] = $token_data->access_token;
+        $_SESSION['token_type'] = $token_data->token_type;
+        $_SESSION['expires_in'] = time() + $token_data->expires_in;
+        
+        // Get user info (if provided in token or make additional request if needed)
+        $user_info = [
+            'username' => $data->username
+            // Add more user info if available in token or make additional request
+        ];
+
+        // Return success response with token info
+        http_response_code(200);
+        echo json_encode([
+            'message' => 'Login successful',
+            'token_type' => $token_data->token_type,
+            'expires_in' => $token_data->expires_in,
+            'user' => $user_info
+        ]);
+    }
+
     public function register(){
         // Get the raw POST data from the request
         $data = json_decode(file_get_contents("php://input"));

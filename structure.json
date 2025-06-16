@@ -38,11 +38,6 @@
                 "description": "The application uses Oauth2 for secure authentication, allowing users to log in with their Ecosys credentials. It must be configurable to work with the Ecosys API."
             }
         },
-        "DesignPatternOfFrontend": {
-            "type": "Concern Separation, Good Layout, Responsive Design",
-            "Language": "HTML, CSS, JavaScript, PHP",
-            "description": "The frontend is designed to be responsive, ensuring a seamless user experience across devices."
-        },
         "Database": "MySQL",
         "Libraries": [
             "PHPMailer",
