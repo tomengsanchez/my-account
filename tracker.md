@@ -24,11 +24,13 @@ Created the initial migration for the users table, which includes fields for loc
 
 [x] Task 1.4: User Creation Endpoint
 
-Built the User model (models/User.php) to interact with the database.
-
-Built the Users controller (controllers/Users.php) to handle API logic.
-
-Successfully created the POST /users endpoint for new user registration, as documented in how_to_add_user.txt.
+- Built the User model (models/User.php) to interact with the database.
+- Built the Users controller (controllers/Users.php) to handle API logic.
+- Successfully created the POST /users endpoint for new user registration.
+- Implemented OAuth server integration for user registration.
+- Added proper error handling and logging for OAuth registration flow.
+- Configured OAuth server settings in config.php.
+- Documented the registration process and configuration requirements.
 
 Phase 2: Frontend Core Setup and Layout
 [ ] Task 2.1: Project Setup

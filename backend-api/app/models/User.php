@@ -42,21 +42,46 @@ class User {
     }
 
     public function register($data) {
-        // ** FIX: Added first_name and last_name to the INSERT statement. **
-        $this->db->query('INSERT INTO users (username, email, first_name, last_name, oauth_user_id) VALUES (:username, :email, :first_name, :last_name, :oauth_user_id)');
+        // Generate a unique oauth_user_id if not provided
+        $oauth_user_id = $data->oauth_user_id ?? uniqid('user_', true);
         
-        // Bind all the necessary values
-        $this->db->bind(':username', $data->username);
-        $this->db->bind(':email', $data->email);
-        $this->db->bind(':first_name', $data->first_name);
-        $this->db->bind(':last_name', $data->last_name);
-        $this->db->bind(':oauth_user_id', $data->oauth_user_id);
+        // Prepare the SQL query with all fields
+        $this->db->query('INSERT INTO users (
+            username, 
+            email, 
+            first_name, 
+            last_name, 
+            oauth_user_id,
+            age,
+            address,
+            contact_number
+        ) VALUES (
+            :username, 
+            :email, 
+            :first_name, 
+            :last_name, 
+            :oauth_user_id,
+            :age,
+            :address,
+            :contact_number
+        )');
+        
+        // Bind all the values
+        $this->db->bind(':username', trim($data->username));
+        $this->db->bind(':email', trim($data->email));
+        $this->db->bind(':first_name', trim($data->first_name));
+        $this->db->bind(':last_name', trim($data->last_name));
+        $this->db->bind(':oauth_user_id', $oauth_user_id);
+        $this->db->bind(':age', !empty($data->age) ? intval($data->age) : null);
+        $this->db->bind(':address', !empty($data->address) ? trim($data->address) : null);
+        $this->db->bind(':contact_number', !empty($data->contact_number) ? trim($data->contact_number) : null);
 
         if ($this->db->execute()) {
             // Fetch the complete user record to return in the API response
             $lastId = $this->db->lastInsertId();
             return $this->findUserById($lastId);
         } else {
+            error_log('Registration failed: ' . $this->db->error());
             return false;
         }
     }
