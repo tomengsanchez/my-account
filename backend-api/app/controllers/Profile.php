@@ -35,7 +35,6 @@ class Profile {
      */
     private function getAuthenticatedUser() {
         // 1. Get the Authorization header from the request.
-        // Using apache_request_headers() provides compatibility across different server setups.
         $headers = apache_request_headers();
         $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
 
@@ -53,9 +52,8 @@ class Profile {
         }
 
         // 3. Verify the token with the OAuth server's user info endpoint.
-        // It's a standard OAuth practice for the auth server to provide an endpoint
-        // (e.g., '/api/user' or '/me') that returns user info for a valid token.
-        // We will assume the endpoint is '/user'.
+        // ** FIX: Changed the user info endpoint from '/api/user' to '/user'. **
+        // This mirrors the pattern of the working '/token' endpoint.
         $userInfoUrl = \OAUTH_SERVER_URL . '/user';
 
         $ch = curl_init();
@@ -85,7 +83,6 @@ class Profile {
         }
 
         // 4. Handle the response from the OAuth server.
-        // If the status is not 200, the token is invalid or expired.
         if ($http_status !== 200) {
             http_response_code(401); // Unauthorized
             echo json_encode(['message' => 'Token is invalid or expired.', 'auth_server_response' => json_decode($response)]);
@@ -94,12 +91,13 @@ class Profile {
 
         $oauthUser = json_decode($response);
         
-        // The OAuth server must return a unique identifier for the user.
-        // Based on your 'register' method, this identifier is named 'id'.
         if (!isset($oauthUser->id)) {
             http_response_code(500);
-            error_log('OAuth response is missing user ID: ' . $response);
-            echo json_encode(['message' => 'Could not identify user from token response.']);
+            error_log('OAuth user response did not contain an "id" field. Full response: ' . $response);
+            echo json_encode([
+                'message' => 'Could not identify user from token response. The user object from the auth server is missing the "id" field.',
+                'auth_server_response' => $oauthUser
+            ]);
             exit();
         }
 
@@ -107,8 +105,6 @@ class Profile {
         $localUser = $this->userModel->findUserByOAuthId($oauthUser->id);
 
         if (!$localUser) {
-            // This case means the user is authenticated correctly with the auth server,
-            // but for some reason, they don't have a profile in this specific application's database.
             http_response_code(404); // Not Found
             echo json_encode(['message' => 'User is authenticated, but no profile was found in this application.']);
             exit();

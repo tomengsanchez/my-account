@@ -1,2 +1,2 @@
-[16-Jun-2025 06:59:12 UTC] OAuth response is missing user ID: {"Application":"EcosysOAuthServer","status":"Running"}
-[16-Jun-2025 06:59:35 UTC] OAuth response is missing user ID: {"Application":"EcosysOAuthServer","status":"Running"}
+[16-Jun-2025 15:32:00 Asia/Manila] OAuth user response did not contain an "id" field. Full response: {"Application":"EcosysOAuthServer","status":"Running"}
+[16-Jun-2025 15:33:12 Asia/Manila] OAuth user response did not contain an "id" field. Full response: {"Application":"EcosysOAuthServer","status":"Running"}

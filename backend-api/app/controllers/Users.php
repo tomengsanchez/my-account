@@ -28,18 +28,18 @@ class Users {
         }
 
         // Prepare the body for the x-www-form-urlencoded request to the OAuth server
+        // ** FIX: Use the configurable scope from config.php **
         $token_params = http_build_query([
             'grant_type' => 'password',
             'client_id' => \OAUTH_CLIENT_ID,
             'client_secret' => \OAUTH_CLIENT_SECRET,
             'username' => $data->username,
             'password' => $data->password,
-            'scope' => 'basic profile users:create'
+            'scope' => \OAUTH_DEFAULT_SCOPE
         ]);
         
-        // ** FIX: The '/api/token' endpoint was returning a generic page.
-        // Switched to '/oauth/token', a common standard for OAuth2 servers. **
-        $token_url = \OAUTH_SERVER_URL . '/token';
+        // Use the endpoint defined in the config file.
+        $token_url = \OAUTH_SERVER_URL . \OAUTH_TOKEN_ENDPOINT;
 
         // Initialize cURL session to contact the OAuth server
         $ch = curl_init();
@@ -99,12 +99,12 @@ class Users {
             'client_secret' => \OAUTH_CLIENT_SECRET,
             'username' => $data->username,
             'password' => $data->password,
-            'scope' => 'basic profile users:create'
+            'scope' => \OAUTH_DEFAULT_SCOPE
         ]);
 
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_URL => \OAUTH_SERVER_URL . '/token',
+            CURLOPT_URL => \OAUTH_SERVER_URL . \OAUTH_TOKEN_ENDPOINT,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => $token_params,
@@ -114,7 +114,6 @@ class Users {
         ]);
         
         $response_body = curl_exec($curl);
-        error_log("Token Proxy cURL Response: " . $response_body);
         $http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         $curl_error = curl_error($curl);
         curl_close($curl);
