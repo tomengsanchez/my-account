@@ -97,3 +97,7 @@ Ensure the entire application is fully responsive.
 [ ] Task 5.3: Error Handling & Feedback
 
 Improve user feedback for all API interactions and form submissions.
+
+---
+### Development Notes
+*   **2025-06-15**: Per user request, frontend development was reset. All frontend tasks are marked as incomplete for a fresh start.
