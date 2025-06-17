@@ -35,3 +35,18 @@ define('OAUTH_DEFAULT_SCOPE', 'profile users:read users:create users:update user
 // These credentials might be used by this backend to authenticate itself with the OAuth server.
 define('OAUTH_API_USERNAME', 'tomeng');
 define('OAUTH_API_PASSWORD', 'tomeng');
+
+ // OAuth2 Public Key
+  // Replace the placeholder below with the actual PEM-formatted public key from your OAuth server.
+  define('OAUTH_PUBLIC_KEY', <<<EOT
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4aSD+/7tfxkc2gu9JzPV
+8ASvR3VzSNkXu2G3U8DP5Wipg0mfySWmV5cp35Ag62CY1nJ+zdWrG6u7XQnPwZON
+sAjAM2K3ujegL+b3Hle7nW6l5+togpFOLC5sY7VFSeo3x9rUEzG98X5IHQAGnyTl
+22tXbbcU13ieMC1nIqCBpjmsl2lEUIVljhcejXSEh8oM1AOp7MnPvEn3ZYqNdcoX
+jumb6JyCaWOS1ELv1uX948oEOEicSkY49N7AIuICXqYzWPYv8iPzQDsi/Qb3UoIC
+D0eXY24Vhg+g3RovYO0hRz1ReYzEQbFcAbuhq7JO1RtQkt336sfgfY4UnCV+xqI9
+3wIDAQAB
+-----END PUBLIC KEY-----
+EOT
+);

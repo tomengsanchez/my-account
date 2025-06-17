@@ -29,7 +29,7 @@ class Profile {
     }
     
     /**
-     * Authenticates the user by decoding the Authorization Bearer JWT token directly.
+     * Authenticates the user by decoding and validating the Authorization Bearer JWT.
      * This is more efficient as it avoids a secondary API call to the auth server.
      * @return object The local user profile object on success. Terminates with an error on failure.
      */
@@ -52,45 +52,71 @@ class Profile {
         }
 
         try {
-            // 3. Decode the JWT payload to extract user information.
-            // A JWT is composed of three parts: header, payload, signature. We need the payload.
+            // 3. Decode the JWT and validate its signature.
             $tokenParts = explode('.', $token);
-            if (count($tokenParts) < 2) {
+            if (count($tokenParts) !== 3) {
                 throw new \Exception('Invalid token format.');
             }
-            $payload_base64 = $tokenParts[1];
             
-            // The payload is Base64Url encoded. We need to decode it.
-            $payload_decoded = base64_decode(str_replace(['-', '_'], ['+', '/'], $payload_base64));
-            if ($payload_decoded === false) {
-                throw new \Exception('Payload decoding failed.');
+            $header_base64 = $tokenParts[0];
+            $payload_base64 = $tokenParts[1];
+            $signature_base64 = $tokenParts[2];
+
+            // Decode header and payload
+            $header = json_decode($this->base64url_decode($header_base64));
+            $payload = json_decode($this->base64url_decode($payload_base64));
+
+            if (!$header || !$payload) {
+                throw new \Exception('Invalid token encoding.');
             }
 
-            $claims = json_decode($payload_decoded);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception('Payload is not valid JSON.');
+            // 4. Get the public key from the configuration and verify the signature.
+            $publicKeyPem = OAUTH_PUBLIC_KEY;
+
+            // SECURITY CHECK: Ensure the placeholder key in the config file has been replaced.
+            if (strpos($publicKeyPem, '...') !== false) {
+                throw new \Exception('The OAUTH_PUBLIC_KEY in app/config/config.php must be configured. The current key is only a placeholder.');
+            }
+            
+            $dataToVerify = $header_base64 . '.' . $payload_base64;
+            $signature = $this->base64url_decode($signature_base64);
+            
+            // The algorithm should be checked from the token header, defaulting to RS256
+            $alg = $header->alg ?? 'RS256';
+            if ($alg !== 'RS256') {
+                throw new \Exception('Unsupported signing algorithm: ' . htmlspecialchars($alg));
             }
 
-            // 4. Validate the token's expiration time from the 'exp' claim.
-            if (!isset($claims->exp) || time() > $claims->exp) {
+            $verificationResult = openssl_verify($dataToVerify, $signature, $publicKeyPem, 'sha256');
+
+            if ($verificationResult !== 1) {
+                 throw new \Exception('Signature verification failed.');
+            }
+            
+            // 5. Validate the token's expiration time from the 'exp' claim.
+            if (!isset($payload->exp) || time() > $payload->exp) {
                 http_response_code(401); // Unauthorized
                 echo json_encode(['message' => 'Token has expired.']);
                 exit();
             }
 
-            // 5. Get the user identifier from the 'sub' (subject) claim.
-            // In OAuth2, the 'sub' claim typically holds the unique ID of the user.
-            if (!isset($claims->sub)) {
+            // 6. Check if the token has been revoked.
+            if (!isset($payload->jti)) {
+                throw new \Exception('Token is missing the "jti" (JWT ID) claim, which is required for revocation checks.');
+            }
+            if ($this->userModel->isTokenRevoked($payload->jti)) {
+                http_response_code(401); // Unauthorized
+                echo json_encode(['message' => 'Token has been revoked. Please log in again.']);
+                exit();
+            }
+
+            // 7. Get the user identifier from the 'sub' (subject) claim.
+            if (!isset($payload->sub)) {
                 throw new \Exception('Token is missing the "sub" (subject) claim, which is required for user identification.');
             }
-            $oauthUserId = $claims->sub;
+            $oauthUserId = $payload->sub;
 
-            // NOTE: A full JWT implementation would also cryptographically validate the token's signature
-            // using the OAuth server's public key. Without signature validation, we are trusting the
-            // claims without being 100% certain they haven't been tampered with.
-            // For this implementation, we proceed by trusting the claims after checking the expiration.
-
-            // 6. Find the corresponding user in our local database using the OAuth ID (from 'sub').
+            // 8. Find the corresponding user in our local database using the OAuth ID (from 'sub').
             $localUser = $this->userModel->findUserByOAuthId($oauthUserId);
 
             if (!$localUser) {
@@ -107,5 +133,14 @@ class Profile {
             echo json_encode(['message' => 'Invalid token: ' . $e->getMessage()]);
             exit();
         }
+    }
+
+    /**
+     * Decodes a Base64Url encoded string.
+     * @param string $data The Base64Url encoded string.
+     * @return string The decoded string.
+     */
+    private function base64url_decode(string $data): string {
+        return base64_decode(str_pad(strtr($data, '-_', '+/'), strlen($data) % 4, '=', STR_PAD_RIGHT));
     }
 }
