@@ -27,7 +27,6 @@ class User {
     }
 
     public function findUserById($id) {
-        // ** FIX: Select all relevant user fields. **
         $this->db->query('SELECT id, username, email, first_name, last_name, age, address, contact_number, created_at FROM users WHERE id = :id');
         $this->db->bind(':id', $id);
         $row = $this->db->single();
@@ -39,6 +38,51 @@ class User {
         $this->db->bind(':oauth_id', $oauth_id);
         $row = $this->db->single();
         return ($this->db->rowCount() > 0) ? $row : false;
+    }
+    
+    /**
+     * Checks if a given JWT ID (jti) exists in the revoked_tokens table.
+     * @param string $jti The JWT ID from the token claims.
+     * @return bool True if the token is revoked, false otherwise.
+     */
+    public function isTokenRevoked(string $jti): bool {
+        // ** DEBUGGING: Add logging to see what is happening. **
+        error_log("Checking revocation status for JTI: " . $jti);
+        
+        $this->db->query('SELECT COUNT(*) as count FROM revoked_tokens WHERE jti = :jti');
+        $this->db->bind(':jti', $jti);
+        
+        $result = $this->db->single();
+        error_log("Revocation check query result: " . print_r($result, true));
+
+        $isRevoked = (int)$result->count > 0;
+        error_log("Is token revoked? " . ($isRevoked ? 'Yes' : 'No'));
+        
+        return $isRevoked;
+    }
+
+    /**
+     * Adds a token's JTI to the revocation list.
+     * @param string $jti The JWT ID to revoke.
+     * @param int $expiryTime The timestamp when the token expires.
+     * @return bool True on success, false on failure.
+     */
+    public function revokeToken(string $jti, int $expiryTime): bool {
+        // ** DEBUGGING: Add logging to see if the insert is successful. **
+        error_log("Attempting to revoke token by inserting JTI: " . $jti);
+        
+        $this->db->query('INSERT INTO revoked_tokens (jti, expiry_time) VALUES (:jti, :expiry_time)');
+        $this->db->bind(':jti', $jti);
+        $this->db->bind(':expiry_time', $expiryTime);
+        
+        $success = $this->db->execute();
+        if ($success) {
+            error_log("Successfully inserted JTI into revoked_tokens table.");
+        } else {
+            error_log("Database execution failed for revoking JTI: " . $jti);
+        }
+        
+        return $success;
     }
 
     public function register($data) {

@@ -1,6 +1,9 @@
 <?php
 namespace controllers;
 
+// Import the helper to use it for logout
+use helpers\JwtHelper;
+
 class Users {
     private $userModel;
 
@@ -12,23 +15,16 @@ class Users {
 
     /**
      * Handle user login by acting as a proxy to the OAuth server.
-     * It forwards the username/password and returns the entire response
-     * from the OAuth server, including the access_token on success or an error on failure.
-     * Corresponds to the endpoint /backend-api/users/login
      */
     public function login() {
-        // Get the raw POST data from the frontend
         $data = json_decode(file_get_contents("php://input"));
 
-        // Validate input
         if (empty($data->username) || empty($data->password)) {
-            http_response_code(400); // Bad Request
+            http_response_code(400);
             echo json_encode(['message' => 'Username and password are required']);
             return;
         }
 
-        // Prepare the body for the x-www-form-urlencoded request to the OAuth server
-        // ** FIX: Use the configurable scope from config.php **
         $token_params = http_build_query([
             'grant_type' => 'password',
             'client_id' => \OAUTH_CLIENT_ID,
@@ -38,10 +34,8 @@ class Users {
             'scope' => \OAUTH_DEFAULT_SCOPE
         ]);
         
-        // Use the endpoint defined in the config file.
         $token_url = \OAUTH_SERVER_URL . \OAUTH_TOKEN_ENDPOINT;
 
-        // Initialize cURL session to contact the OAuth server
         $ch = curl_init();
         curl_setopt_array($ch, [
             CURLOPT_URL => $token_url,
@@ -52,35 +46,60 @@ class Users {
                 'Content-Type: application/x-www-form-urlencoded',
                 'Accept: application/json'
             ],
-            // TEMPORARY WORKAROUND: For servers with self-signed/invalid SSL certs.
-            // This should be REMOVED in a production environment. Use a valid certificate.
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => 0
         ]);
 
-        // Execute the request and get the response and status code
         $response_body = curl_exec($ch);
         $http_status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $curl_error = curl_error($ch);
         curl_close($ch);
         
         if ($curl_error) {
-            // This handles network-level errors (e.g., cannot connect to server)
             http_response_code(500);
-            error_log("Login Proxy cURL Error: " . $curl_error);
             echo json_encode(['error' => 'proxy_error', 'message' => 'Could not connect to the authentication server.']);
             return;
         }
 
-        // --- Proxy the Response ---
-        // Set the same HTTP status code that we received from the OAuth server.
         http_response_code($http_status);
-        
-        // Echo the exact response body (JSON) from the OAuth server back to the frontend.
-        // This will contain the access_token on success or a detailed error on failure.
         echo $response_body;
     }
     
+    /**
+     * Handles user logout by revoking the provided access token.
+     * This endpoint requires a valid Bearer token in the Authorization header.
+     */
+    public function logout() {
+        // 1. Get the token from the Authorization header.
+        $headers = apache_request_headers();
+        $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
+        if (!$authHeader || sscanf($authHeader, 'Bearer %s', $token) !== 1) {
+             http_response_code(401);
+             echo json_encode(['message' => 'Authorization token not found or malformed.']);
+             exit();
+        }
+
+        try {
+            // 2. Decode the token to get its claims (jti and exp).
+            // We use our helper, which also validates the token format and expiration.
+            $claims = JwtHelper::getClaims($token);
+
+            // 3. Add the token's JTI to the revocation list in the database.
+            if ($this->userModel->revokeToken($claims->jti, $claims->exp)) {
+                http_response_code(200);
+                echo json_encode(['message' => 'Logout successful. Token has been revoked.']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['message' => 'Failed to revoke token.']);
+            }
+
+        } catch (\Exception $e) {
+            // This catches errors from the JwtHelper (e.g., if token is already expired or revoked).
+            http_response_code(401);
+            echo json_encode(['message' => 'Invalid token provided for logout: ' . $e->getMessage()]);
+        }
+    }
+
     /**
      * Acts as a secure proxy to the OAuth server's /token endpoint.
      */
@@ -120,7 +139,6 @@ class Users {
         
         if ($curl_error) {
             http_response_code(500);
-            error_log("Token Proxy cURL Error: " . $curl_error);
             echo json_encode(['error' => 'proxy_error', 'message' => 'Could not connect to the authentication server.']);
             return;
         }
@@ -136,15 +154,9 @@ class Users {
         $data = json_decode(file_get_contents("php://input"));
 
         $required_fields = ['username', 'email', 'first_name', 'last_name', 'password'];
-        $missing_fields = [];
-        foreach ($required_fields as $field) {
-            if (empty($data->$field)) {
-                $missing_fields[] = $field;
-            }
-        }
-        if (!empty($missing_fields)) {
+        if (count(array_intersect($required_fields, array_keys((array)$data))) !== count($required_fields)) {
             http_response_code(400);
-            echo json_encode(['message' => 'Missing required fields.', 'missing_fields' => $missing_fields]);
+            echo json_encode(['message' => 'Missing required fields.']);
             return;
         }
 
@@ -160,17 +172,7 @@ class Users {
         }
 
         $oauth_url = \OAUTH_SERVER_URL . \OAUTH_REGISTER_ENDPOINT;
-        $post_data = json_encode([
-            'client_id' => \OAUTH_CLIENT_ID,
-            'username' => $data->username,
-            'password' => $data->password,
-            'first_name' => $data->first_name,
-            'last_name' => $data->last_name,
-            'email' => $data->email,
-            'age' => !empty($data->age) ? intval($data->age) : null,
-            'address' => $data->address ?? null,
-            'contact_number' => $data->contact_number ?? null
-        ]);
+        $post_data = json_encode($data);
         
         $ch = curl_init();
         curl_setopt_array($ch, [
