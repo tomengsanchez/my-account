@@ -1,6 +1,9 @@
 <?php
 namespace helpers;
 
+// Import the User model to use it as a type hint
+use models\User;
+
 /**
  * A helper class for handling JSON Web Tokens (JWT).
  * This class provides static methods to decode and validate tokens.
@@ -9,18 +12,14 @@ class JwtHelper {
 
     /**
      * Decodes a JWT and returns its claims after basic validation.
-     * It now also checks against a token revocation list.
+     * It now also checks against a token revocation list via a dependency.
      *
      * @param string $token The JWT string.
+     * @param User $userModel An instance of the User model to check for revocation.
      * @return object The claims (payload) of the token as an object.
      * @throws \Exception If the token is invalid, malformed, expired, or revoked.
      */
-    public static function getClaims(string $token): object {
-        // ** DEBUGGING: Add a die() statement to force a server cache refresh. **
-        // If you see this message when you call /profile, the file has been updated on the server.
-        // If you still see the profile data, the server is running an old, cached version of this file.
-        // die('DEBUG: JwtHelper file has been updated. Cache should be clear.');
-
+    public static function getClaims(string $token, User $userModel): object {
         // 1. Decode the JWT payload.
         $tokenParts = explode('.', $token);
         if (count($tokenParts) !== 3) {
@@ -51,8 +50,7 @@ class JwtHelper {
             throw new \Exception('Token is missing the "jti" (JWT ID) claim.');
         }
 
-        // 4. Check if the token has been revoked.
-        $userModel = new \models\User(); 
+        // 4. Check if the token has been revoked using the injected dependency.
         if ($userModel->isTokenRevoked($claims->jti)) {
             throw new \Exception('Token has been revoked.');
         }

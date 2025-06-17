@@ -1,53 +1,37 @@
-[17-Jun-2025 17:24:16 Asia/Manila] Checking revocation status for JTI: bc4b1ccb0d39b4189374cdd8562a41a8ede3fb0e39c82d86548896285c7e76098443192cf28530fc
-[17-Jun-2025 17:24:16 Asia/Manila] Revocation check query result: stdClass Object
+[17-Jun-2025 18:34:06 Asia/Manila] Checking revocation status for JTI: a02f8dffe0469629b52e520b4de2059e70b1f2aef20ad6f73be81b7b97daf47972331110b720e598
+[17-Jun-2025 18:34:06 Asia/Manila] Revocation check query result: stdClass Object
+(
+    [count] => 1
+)
+
+[17-Jun-2025 18:34:06 Asia/Manila] Is token revoked? Yes
+[17-Jun-2025 18:34:07 Asia/Manila] Checking revocation status for JTI: a02f8dffe0469629b52e520b4de2059e70b1f2aef20ad6f73be81b7b97daf47972331110b720e598
+[17-Jun-2025 18:34:07 Asia/Manila] Revocation check query result: stdClass Object
+(
+    [count] => 1
+)
+
+[17-Jun-2025 18:34:07 Asia/Manila] Is token revoked? Yes
+[17-Jun-2025 18:34:22 Asia/Manila] Checking revocation status for JTI: ce58f5b9a372255247d210e161eea9bd46e32b622706b772d86fc9b4cc1ec0c387837c5781324d20
+[17-Jun-2025 18:34:22 Asia/Manila] Revocation check query result: stdClass Object
 (
     [count] => 0
 )
 
-[17-Jun-2025 17:24:16 Asia/Manila] Is token revoked? No
-[17-Jun-2025 17:24:16 Asia/Manila] Attempting to revoke token by inserting JTI: bc4b1ccb0d39b4189374cdd8562a41a8ede3fb0e39c82d86548896285c7e76098443192cf28530fc
-[17-Jun-2025 17:24:16 Asia/Manila] Successfully inserted JTI into revoked_tokens table.
-[17-Jun-2025 17:24:29 Asia/Manila] Checking revocation status for JTI: bc4b1ccb0d39b4189374cdd8562a41a8ede3fb0e39c82d86548896285c7e76098443192cf28530fc
-[17-Jun-2025 17:24:29 Asia/Manila] Revocation check query result: stdClass Object
-(
-    [count] => 1
-)
-
-[17-Jun-2025 17:24:29 Asia/Manila] Is token revoked? Yes
-[17-Jun-2025 17:26:21 Asia/Manila] Checking revocation status for JTI: bc4b1ccb0d39b4189374cdd8562a41a8ede3fb0e39c82d86548896285c7e76098443192cf28530fc
-[17-Jun-2025 17:26:21 Asia/Manila] Revocation check query result: stdClass Object
-(
-    [count] => 1
-)
-
-[17-Jun-2025 17:26:21 Asia/Manila] Is token revoked? Yes
-[17-Jun-2025 17:26:22 Asia/Manila] Checking revocation status for JTI: bc4b1ccb0d39b4189374cdd8562a41a8ede3fb0e39c82d86548896285c7e76098443192cf28530fc
-[17-Jun-2025 17:26:22 Asia/Manila] Revocation check query result: stdClass Object
-(
-    [count] => 1
-)
-
-[17-Jun-2025 17:26:22 Asia/Manila] Is token revoked? Yes
-[17-Jun-2025 17:26:42 Asia/Manila] Checking revocation status for JTI: ac7acdb7030ceb521f750b90214c6c8d204b8a67e2fffa332d4639f3b7f583bbf7025f7a898005af
-[17-Jun-2025 17:26:42 Asia/Manila] Revocation check query result: stdClass Object
+[17-Jun-2025 18:34:22 Asia/Manila] Is token revoked? No
+[17-Jun-2025 18:34:25 Asia/Manila] Checking revocation status for JTI: ce58f5b9a372255247d210e161eea9bd46e32b622706b772d86fc9b4cc1ec0c387837c5781324d20
+[17-Jun-2025 18:34:25 Asia/Manila] Revocation check query result: stdClass Object
 (
     [count] => 0
 )
 
-[17-Jun-2025 17:26:42 Asia/Manila] Is token revoked? No
-[17-Jun-2025 17:26:47 Asia/Manila] Checking revocation status for JTI: ac7acdb7030ceb521f750b90214c6c8d204b8a67e2fffa332d4639f3b7f583bbf7025f7a898005af
-[17-Jun-2025 17:26:47 Asia/Manila] Revocation check query result: stdClass Object
-(
-    [count] => 0
-)
-
-[17-Jun-2025 17:26:47 Asia/Manila] Is token revoked? No
-[17-Jun-2025 17:26:47 Asia/Manila] Attempting to revoke token by inserting JTI: ac7acdb7030ceb521f750b90214c6c8d204b8a67e2fffa332d4639f3b7f583bbf7025f7a898005af
-[17-Jun-2025 17:26:47 Asia/Manila] Successfully inserted JTI into revoked_tokens table.
-[17-Jun-2025 17:26:49 Asia/Manila] Checking revocation status for JTI: ac7acdb7030ceb521f750b90214c6c8d204b8a67e2fffa332d4639f3b7f583bbf7025f7a898005af
-[17-Jun-2025 17:26:49 Asia/Manila] Revocation check query result: stdClass Object
+[17-Jun-2025 18:34:25 Asia/Manila] Is token revoked? No
+[17-Jun-2025 18:34:25 Asia/Manila] Attempting to revoke token by inserting JTI: ce58f5b9a372255247d210e161eea9bd46e32b622706b772d86fc9b4cc1ec0c387837c5781324d20
+[17-Jun-2025 18:34:25 Asia/Manila] Successfully inserted JTI into revoked_tokens table.
+[17-Jun-2025 18:34:29 Asia/Manila] Checking revocation status for JTI: ce58f5b9a372255247d210e161eea9bd46e32b622706b772d86fc9b4cc1ec0c387837c5781324d20
+[17-Jun-2025 18:34:29 Asia/Manila] Revocation check query result: stdClass Object
 (
     [count] => 1
 )
 
-[17-Jun-2025 17:26:49 Asia/Manila] Is token revoked? Yes
+[17-Jun-2025 18:34:29 Asia/Manila] Is token revoked? Yes

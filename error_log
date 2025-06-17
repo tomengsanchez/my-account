@@ -1,6 +1,0 @@
-[17-Jun-2025 09:31:57 UTC] PHP Warning:  include(layouts/header.php): Failed to open stream: No such file or directory in /home/uskujc2375lw/account.ecosyscorp.ph/index.php on line 15
-[17-Jun-2025 09:31:57 UTC] PHP Warning:  include(layouts/header.php): Failed to open stream: No such file or directory in /home/uskujc2375lw/account.ecosyscorp.ph/index.php on line 15
-[17-Jun-2025 09:31:57 UTC] PHP Warning:  include(): Failed opening 'layouts/header.php' for inclusion (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/uskujc2375lw/account.ecosyscorp.ph/index.php on line 15
-[17-Jun-2025 09:31:57 UTC] PHP Warning:  include(layouts/footer.php): Failed to open stream: No such file or directory in /home/uskujc2375lw/account.ecosyscorp.ph/index.php on line 24
-[17-Jun-2025 09:31:57 UTC] PHP Warning:  include(layouts/footer.php): Failed to open stream: No such file or directory in /home/uskujc2375lw/account.ecosyscorp.ph/index.php on line 24
-[17-Jun-2025 09:31:57 UTC] PHP Warning:  include(): Failed opening 'layouts/footer.php' for inclusion (include_path='.:/opt/alt/php83/usr/share/pear:/opt/alt/php83/usr/share/php:/usr/share/pear:/usr/share/php') in /home/uskujc2375lw/account.ecosyscorp.ph/index.php on line 24

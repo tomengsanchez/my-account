@@ -79,10 +79,10 @@ class Users {
              exit();
         }
 
-        try {
+         try {
             // 2. Decode the token to get its claims (jti and exp).
-            // We use our helper, which also validates the token format and expiration.
-            $claims = JwtHelper::getClaims($token);
+            // Pass the controller's userModel instance into the helper.
+            $claims = JwtHelper::getClaims($token, $this->userModel);
 
             // 3. Add the token's JTI to the revocation list in the database.
             if ($this->userModel->revokeToken($claims->jti, $claims->exp)) {
@@ -94,8 +94,8 @@ class Users {
             }
 
         } catch (\Exception $e) {
-            // This catches errors from the JwtHelper (e.g., if token is already expired or revoked).
-            http_response_code(401);
+            // ...
+             http_response_code(401);
             echo json_encode(['message' => 'Invalid token provided for logout: ' . $e->getMessage()]);
         }
     }
