@@ -1,0 +1,213 @@
+{
+  "projectName": "My Ecosys Account",
+  "developer": "Michael Sanchez",
+  "lastUpdated": "2025-06-17T17:45:00Z",
+  "description": "A centralized user portal for Ecosys services, designed to provide a secure and seamless experience for user registration, login, and profile management.",
+  "technologyStack": {
+    "backend": [
+      "Vanilla PHP",
+      "MySQL"
+    ],
+    "frontend": [
+      "PHP",
+      "JavaScript",
+      "Tailwind CSS"
+    ],
+    "authentication": [
+      "OAuth 2.0",
+      "JSON Web Tokens (JWT)"
+    ]
+  },
+  "architecture": {
+    "pattern": "Model-View-Controller (MVC)",
+    "description": "The application follows a Model-View-Controller (MVC) pattern for the backend, promoting a clean separation of concerns. The frontend and backend are decoupled, communicating via a RESTful API.",
+    "frontend": {
+      "entryPoint": "index.php",
+      "description": "The main entry point is index.php, which loads content dynamically using JavaScript. It uses Tailwind CSS for styling."
+    },
+    "backend": {
+      "entryPoint": "backend-api/public/index.php",
+      "description": "The backend is a RESTful API that the frontend communicates with. The entry point is backend-api/public/index.php.",
+      "coreComponents": [
+        {
+          "file": "backend-api/app/core/Core.php",
+          "description": "The main router for the application. It parses the URL and calls the appropriate controller and method."
+        },
+        {
+          "file": "backend-api/app/core/Database.php",
+          "description": "Handles the database connection using PDO and prepares statements to prevent SQL injection."
+        }
+      ]
+    }
+  },
+  "authentication": {
+    "method": "OAuth 2.0 with JWT",
+    "server": "https://ithelp.ecosyscorp.ph/etc-backend",
+    "flow": "The backend acts as a client to the central OAuth server, proxying login and registration requests. Protected API endpoints require a JWT in the Authorization header.",
+    "tokenRevocation": {
+      "enabled": true,
+      "mechanism": "When a user logs out, their token's unique identifier (JTI) is stored in the `revoked_tokens` table to invalidate it."
+    },
+    "jwtHelper": {
+      "file": "backend-api/app/helpers/JwtHelper.php",
+      "description": "A helper class for creating, validating, and managing JSON Web Tokens."
+    }
+  },
+  "apiEndpoints": {
+    "baseUrl": "/backend-api",
+    "endpoints": [
+      {
+        "method": "POST",
+        "path": "/users/register",
+        "description": "Creates a new user profile.",
+        "requiresAuth": false,
+        "parameters": [
+          {
+            "name": "username",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "first_name",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "last_name",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "password",
+            "type": "string",
+            "required": true
+          }
+        ]
+      },
+      {
+        "method": "POST",
+        "path": "/users/login",
+        "description": "Authenticates a user with their email and password.",
+        "requiresAuth": false,
+        "parameters": [
+          {
+            "name": "email",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "password",
+            "type": "string",
+            "required": true
+          }
+        ]
+      },
+      {
+        "method": "POST",
+        "path": "/users/logout",
+        "description": "Revokes the user's access token.",
+        "requiresAuth": true
+      },
+      {
+        "method": "GET",
+        "path": "/profile",
+        "description": "Retrieves the authenticated user's profile information.",
+        "requiresAuth": true
+      }
+    ]
+  },
+  "database": {
+    "type": "MySQL",
+    "name": "etc_frontend_dev",
+    "tables": [
+      {
+        "name": "users",
+        "migrationFile": "backend-api/migrations/2024_06_15_0001_create_users_table.php",
+        "description": "Stores local user profiles.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "INT",
+            "primaryKey": true,
+            "autoIncrement": true
+          },
+          {
+            "name": "oauth_user_id",
+            "type": "INT",
+            "description": "Foreign key from the OAuth server."
+          },
+          {
+            "name": "username",
+            "type": "VARCHAR(255)",
+            "unique": true
+          },
+          {
+            "name": "email",
+            "type": "VARCHAR(255)",
+            "unique": true
+          },
+          {
+            "name": "first_name",
+            "type": "VARCHAR(255)"
+          },
+          {
+            "name": "last_name",
+            "type": "VARCHAR(255)"
+          },
+          {
+            "name": "created_at",
+            "type": "TIMESTAMP"
+          },
+          {
+            "name": "updated_at",
+            "type": "TIMESTAMP"
+          }
+        ]
+      },
+      {
+        "name": "revoked_tokens",
+        "migrationFile": "backend-api/migrations/2025_06_16_0001_create_revoked_tokens_table.php",
+        "description": "Stores the JTI of revoked JWTs to prevent reuse.",
+        "columns": [
+          {
+            "name": "id",
+            "type": "INT",
+            "primaryKey": true,
+            "autoIncrement": true
+          },
+          {
+            "name": "jti",
+            "type": "VARCHAR(255)",
+            "unique": true
+          },
+          {
+            "name": "expires_at",
+            "type": "TIMESTAMP"
+          }
+        ]
+      }
+    ]
+  },
+  "databaseMigrations": {
+    "script": "backend-api/migrate.php",
+    "usage": "Run from the command line (e.g., `php backend-api/migrate.php`) to initialize or update the database schema.",
+    "description": "This script automatically scans the `backend-api/migrations` directory and executes any new migration files. Each migration file contains the SQL necessary to create or alter a database table, ensuring the schema is consistent across different environments.",
+    "files": [
+      "backend-api/migrations/2024_06_15_0001_create_users_table.php",
+      "backend-api/migrations/2025_06_16_0001_create_revoked_tokens_table.php"
+    ]
+  },
+  "projectStatus": {
+    "trackerFile": "tracker.md",
+    "summary": "The frontend development was reset on June 15, 2025, for a fresh start. The backend is largely complete and functional."
+  },
+    "notes": {
+        "development": "This application is developed by Michael Sanchez, a software engineer with a focus on web applications. It is built using PHP and MySQL, ensuring a robust and secure user management system.",
+        "importantNotice": "This application is designed to be secure and user-friendly. It follows best practices for web development and security. Please ensure that you keep your dependencies up to date and follow security guidelines when deploying this application."
+    }
+}
